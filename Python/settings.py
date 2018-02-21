@@ -25,7 +25,7 @@ SECRET_KEY = '(_usf6vn_84o%*0y9==wf3x0ewp9@juri!047d15k_gey8eq&3'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['172.17.*.*']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
