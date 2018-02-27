@@ -78,6 +78,10 @@ DATABASES = {
     'default': {
         
         'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'student',
+        'USER': 'Python_DB_Inst',
+        'PASSWORD': 'sachin123',
+        'HOST': 'connect-python.cd6dkhdncwjg.us-east-1.rds.amazonaws.com',
         'PORT': '3306'
         
         
