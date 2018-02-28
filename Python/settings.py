@@ -73,8 +73,8 @@ WSGI_APPLICATION = 'Python.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-import os
-if 'RDS_HOSTNAME' in os.environ:
+
+
 DATABASES = {
     'default': {
            'ENGINE': 'django.db.backends.mysql',
