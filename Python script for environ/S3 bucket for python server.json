@@ -1,0 +1,583 @@
+{
+  "Description": "Pattern 1 - Auto Scaling",
+  "Mappings": {
+    "Environment2VPCID": {
+      "dev": {
+        "VpcId": "vpc-dbca0ba0",
+        "VpcName": "dev"
+      },
+      "staging": {
+        "VpcId": "vpc-850711e0",
+        "VpcName": "prod"
+      },
+      "prod": {
+        "VpcId": "vpc-850711e0",
+        "VpcName": "prod"
+      }
+    },
+    "VPCID2Subnets": {
+      "vpc-dbca0ba0": {
+        "private": [
+          "subnet-9e90d8b1",
+          "subnet-76f0bc2b",
+          "subnet-dbad65d4"
+        ],
+        
+        "public": [
+          "subnet-50aee66f",
+          "subnet-669aa702",
+          "subnet-78c1d133"
+
+          ]
+      },
+      "vpc-850711e0": {
+        "private": [
+          "subnet-7b706441",
+          "subnet-c2d4f3b5",
+          "subnet-b07c1e9b",
+          "subnet-d8acd581"
+        ],
+        "public": [
+          "subnet-0e706434",
+          "subnet-ddd4f3aa",
+          "subnet-a67c1e8d",
+          "subnet-dbacd582"
+        ]
+      }
+    },
+    "VPCID2SecurityGroup": {
+      "vpc-dbca0ba0": {
+        "private": [
+          "sg-f0277187"
+        ],
+        "public": [
+          "sg-f0277187",
+          "sg-f0277187"
+        ]
+      },
+      "vpc-850711e0": {
+        "private": [
+          "sg-5925e13e"
+        ],
+        "public": [
+          "sg-5925e13e",
+          "sg-cad913ad"
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "InstanceType": {
+      "AllowedValues": [
+        "t2.micro",
+        "m3.medium",
+        "m3.large",
+        "m3.xlarge",
+        "m3.2xlarge",
+        "c3.large",
+        "c3.xlarge",
+        "c3.2xlarge",
+        "c3.4xlarge",
+        "c3.8xlarge",
+        "g2.2xlarge",
+        "g2.8xlarge",
+        "d2.xlarge",
+        "d2.2xlarge",
+        "d2.4xlarge",
+        "d2.8xlarge",
+        "r3.large",
+        "r3.xlarge",
+        "r3.2xlarge",
+        "r3.4xlarge",
+        "r3.8xlarge"
+      ],
+      "ConstraintDescription": "must be a valid EC2 instance type.",
+      "Description": "EC2 instance type",
+      "Type": "String",
+      "Default": "t2.micro"
+    },
+    "AMI": {
+      "Description": "AMI to use for EC2",
+      "MaxLength": "15",
+      "MinLength": "10",
+      "Type": "String",
+      "Default": "ami-66506c"
+    },
+    "KeyPairName": {
+      "AllowedPattern": "[\\x20-\\x7E]*",
+      "ConstraintDescription": "Can contain only ASCII characters.",
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the service instances",
+      "MaxLength": "255",
+      "MinLength": "1",
+      "Type": "String",
+      "Default": "platform"
+    },
+    "EnvironmentName": {
+      "Description": "Chef environment for the game. Ex: dev, staging, prod",
+      "MaxLength": "50",
+      "MinLength": "1",
+      "Type": "String",
+      "AllowedValues": [
+        "dev",
+        "staging",
+        "prod"
+      ],
+      "Default": "dev"
+    },
+    "Public": {
+      "Type": "String",
+      "ConstraintDescription": "Can contain only ASCII characters.",
+      "Description": "subnet Type that used for Instance launch",
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Default": "true"
+    },
+    "PublicIP": {
+      "Type": "String",
+      "ConstraintDescription": "Can contain only ASCII characters.",
+      "Description": "subnet Type that used for Instance launch",
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Default": "true"
+    },
+    "S3BucketName": {
+      "Description": "This bucket contain the userdata script and chef-server validation key",
+      "MaxLength": "35",
+      "MinLength": "1",
+      "Type": "String",
+      "Default": "voicethread-platform"
+    },
+    "S3BucketScript": {
+      "Description": "This is the script that will be run before run run_list",
+      "MaxLength": "35",
+      "MinLength": "1",
+      "Type": "String",
+      "Default": "wrapper-encrypted.sh"
+    },
+    "AdminEmail": {
+      "Description": "Email for notifications relating to this stack",
+      "MaxLength": "35",
+      "MinLength": "1",
+      "Default": "jaipbapna@gmail.com",
+      "Type": "String"
+    },
+    "AutoscalingDesiredCapacity": {
+      "MinValue": "1",
+      "Type": "Number",
+      "Default": "1"
+    },
+    "AutoscalingMinSize": {
+      "MinValue": "1",
+      "Type": "Number",
+      "Default": "1"
+    },
+    "AutoscalingMaxSize": {
+      "MinValue": "1",
+      "Type": "Number",
+      "Default": "1"
+    },
+    "ServiceName": {
+      "Description": "Name of the service Ex: frontend,auth,centrify",
+      "MaxLength": "35",
+      "MinLength": "1",
+      "Type": "String",
+      "AllowedValues": [
+        "frontend",
+        "ed",
+        "auth",
+        "centrify",
+        "compute",
+        "export",
+        "houstonisd",
+        "media",
+        "support"
+      ],
+
+      "Default": "frontend"
+    },
+
+ 
+      "IAMInstanceProfile": {
+      "Description": "Name of IAM Profile",
+      "MaxLength": "100",
+      "MinLength": "1",
+      "Type": "String",
+      "Default": "arn:aws:iam::372347158988:instance-profile/sachin-dev"
+    },
+
+    "Namespace": {
+      "AllowedPattern": "[\\x20-\\x7E]*",
+      "ConstraintDescription": "Can contain only ASCII characters.",
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the service instances",
+      "MaxLength": "25",
+      "MinLength": "1",
+      "Type": "String",
+      "Default": "voicethread"
+    }
+  },
+  "Outputs": {
+    "ServiceAutoScalingGroup": {
+      "Description": "Auto-scaling Group for the services",
+      "Value": {
+        "Ref": "AutoScalingGroup"
+      }
+    },
+    "ServiceLaunchConfig": {
+      "Description": "Service configuration for the auto-scaling group",
+      "Value": {
+        "Ref": "LaunchConfig"
+      }
+    }
+  },
+  "Conditions": {
+    "CheckEnvironment": {
+      "Fn::Equals": [
+        {
+          "Ref": "EnvironmentName"
+        },
+        "dev"
+      ]
+    },
+    "isPublic": {
+      "Fn::Equals": [
+        {
+          "Ref": "Public"
+        },
+        "true"
+      ]
+    },
+    "isPublicIP": {
+      "Fn::Equals": [
+        {
+          "Ref": "PublicIP"
+        },
+        "true"
+      ]
+    }
+  },
+  "Resources": {
+    "LaunchConfig": {
+      "Properties": {
+        "AssociatePublicIpAddress": {
+          "Fn::If": [
+            "isPublic",
+            "true",
+            {
+              "Fn::If": [
+                "isPublicIP",
+                "true",
+                "false"
+              ]
+            }
+          ]
+        },
+
+        "IamInstanceProfile": {
+          "Ref": "IAMInstanceProfile"
+        },
+        "ImageId": {
+          "Ref": "AMI"
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "KeyName": {
+          "Ref": "KeyPairName"
+        },
+        "SecurityGroups": {
+          "Fn::If": [
+            "isPublic",
+            {
+              "Fn::FindInMap": [
+                "VPCID2SecurityGroup",
+                {
+                  "Fn::FindInMap": [
+                    "Environment2VPCID",
+                    {
+                      "Ref": "EnvironmentName"
+                    },
+                    "VpcId"
+                  ]
+                },
+                "public"
+              ]
+            },
+            {
+              "Fn::FindInMap": [
+                "VPCID2SecurityGroup",
+                {
+                  "Fn::FindInMap": [
+                    "Environment2VPCID",
+                    {
+                      "Ref": "EnvironmentName"
+                    },
+                    "VpcId"
+                  ]
+                },
+                "private"
+              ]
+            }
+          ]
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "set -x\n",
+                "sudo apt-get -y update\n",
+                "sudo apt-get -y install python-pip\n",
+                "sudo apt-get -y install awscli\n",
+
+
+                "##!/bin/sh\n", 
+
+                "cat >> /etc/profile.d/vt-cf-env.sh << EOF\n",
+                "export ENVIRONMENT=",
+                {
+                  "Ref": "EnvironmentName"
+                },
+                "\nexport STACK=",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "\nexport ADMIN_EMAIL=",
+                {
+                  "Ref": "AdminEmail"
+                },
+                "\nexport S3_BUCKET=",
+                {
+                  "Ref": "S3BucketName"
+                },
+                "\nexport S3_BUCKET_SCRIPT=",
+                {
+                  "Ref": "S3BucketScript"
+                },
+                "\nexport SERVICE_NAME=",
+                {
+                  "Ref": "ServiceName"
+                },
+                "\nexport ROLE_NAME=",
+                {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      {
+                        "Ref": "Namespace"
+                      },
+                      {
+                        "Ref": "ServiceName"
+                      },
+                      "deploy"
+                    ]
+                  ]
+                },
+                "\nEOF\n",
+                "source /etc/profile.d/vt-cf-env.sh\n",
+                "mkdir -p /opt/${STACK_BUCKET}\n",
+                "aws s3 cp s3://${S3_BUCKET} /opt/${S3_BUCKET} --recursive\n",
+                "bash /opt/${S3_BUCKET}/${S3_BUCKET_SCRIPT}"
+              ]
+            ]
+          }
+        }
+      },
+      "Type": "AWS::AutoScaling::LaunchConfiguration"
+    },
+    "AutoScalingGroup": {
+      "Properties": {
+        "AvailabilityZones": {
+          "Fn::GetAZs": "us-east-1c"
+        },
+        "DesiredCapacity": {
+          "Ref": "AutoscalingDesiredCapacity"
+        },
+        "HealthCheckGracePeriod": 300,
+        "HealthCheckType": "EC2",
+        "LaunchConfigurationName": {
+          "Ref": "LaunchConfig"
+        },
+        "MaxSize": {
+          "Ref": "AutoscalingMaxSize"
+        },
+        "MinSize": {
+          "Ref": "AutoscalingMinSize"
+        },
+        
+        "Tags": [
+          {
+            "Key": "environment",
+            "PropagateAtLaunch": "true",
+            "Value": {
+              "Ref": "EnvironmentName"
+            }
+          },
+           {
+            "Key": "Name",
+            "PropagateAtLaunch": "true",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "EnvironmentName"
+                  },
+                  "-",
+                  {
+                    "Ref": "ServiceName"
+                  },
+                  ".",
+                  
+                ]
+              ]
+            }
+          },
+          {
+            "Key": "admin",
+            "PropagateAtLaunch": "true",
+            "Value": {
+              "Ref": "AdminEmail"
+            }
+          },
+          {
+            "Key": "service",
+            "PropagateAtLaunch": "true",
+            "Value": {
+              "Ref": "ServiceName"
+            }
+          },
+          {
+            "Key": "active",
+            "PropagateAtLaunch": "true",
+            "Value": true
+          }
+        ],
+        "VPCZoneIdentifier": {
+          "Fn::If": [
+            "isPublic",
+            {
+              "Fn::FindInMap": [
+                "VPCID2Subnets",
+                {
+                  "Fn::FindInMap": [
+                    "Environment2VPCID",
+                    {
+                      "Ref": "EnvironmentName"
+                    },
+                    "VpcId"
+                  ]
+                },
+                "public"
+              ]
+            },
+            {
+              "Fn::FindInMap": [
+                "VPCID2Subnets",
+                {
+                  "Fn::FindInMap": [
+                    "Environment2VPCID",
+                    {
+                      "Ref": "EnvironmentName"
+                    },
+                    "VpcId"
+                  ]
+                },
+                "private"
+              ]
+            }
+          ]
+        }
+      },
+      "Type": "AWS::AutoScaling::AutoScalingGroup"
+    },
+    "CpuAlarmHigh": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "scaleUpPolicy"
+          }
+        ],
+        "AlarmDescription": "Alarm if CPU higher than 50",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "AutoScalingGroupName",
+            "Value": {
+              "Ref": "AutoScalingGroup"
+            }
+          }
+        ],
+        "EvaluationPeriods": "1",
+        "InsufficientDataActions": [
+          {
+            "Ref": "scaleUpPolicy"
+          }
+        ],
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Period": "600",
+        "Statistic": "Average",
+        "Threshold": "50"
+      },
+      "Type": "AWS::CloudWatch::Alarm"
+    },
+    "CpuAlarmLow": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "scaleDownPolicy"
+          }
+        ],
+        "AlarmDescription": "Alarm if CPU higher than 10",
+        "ComparisonOperator": "LessThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "AutoScalingGroupName",
+            "Value": {
+              "Ref": "AutoScalingGroup"
+            }
+          }
+        ],
+        "EvaluationPeriods": "1",
+        "InsufficientDataActions": [
+          {
+            "Ref": "scaleDownPolicy"
+          }
+        ],
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Period": "300",
+        "Statistic": "Average",
+        "Threshold": "10"
+      },
+      "Type": "AWS::CloudWatch::Alarm"
+    },
+    "scaleDownPolicy": {
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "AutoScalingGroupName": {
+          "Ref": "AutoScalingGroup"
+        },
+        "Cooldown": 300,
+        "ScalingAdjustment": "-1"
+      },
+      "Type": "AWS::AutoScaling::ScalingPolicy"
+    },
+    "scaleUpPolicy": {
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "AutoScalingGroupName": {
+          "Ref": "AutoScalingGroup"
+        },
+        "Cooldown": 300,
+        "ScalingAdjustment": "+1"
+      },
+      "Type": "AWS::AutoScaling::ScalingPolicy"
+    }
+  }
+}
