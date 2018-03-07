@@ -78,11 +78,11 @@ WSGI_APPLICATION = 'Python.wsgi.application'
 DATABASES = {
     'default': {
            'ENGINE': 'django.db.backends.mysql',
-            'NAME': environment.sh['RDS_DB_NAME'],
-            'USER': environment.sh['RDS_USERNAME'],
-            'PASSWORD': environment.sh['RDS_PASSWORD'],
-            'HOST': environment.sh['RDS_HOSTNAME'],
-            'PORT': environment.sh['RDS_PORT'],
+            'NAME': ${environment}['RDS_DB_NAME'],
+            'USER': ${environment}['RDS_USERNAME'],
+            'PASSWORD': ${environment}['RDS_PASSWORD'],
+            'HOST': ${environment}['RDS_HOSTNAME'],
+            'PORT': ${environment}['RDS_PORT'],
         
         
     }
